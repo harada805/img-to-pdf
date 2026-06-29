@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Img to PDF • Konverter Gambar ke PDF Gratis</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Using unpkg for better reliability when deployed on Vercel -->
+    <script src="https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
@@ -716,7 +717,7 @@
         }
 
         async function convertToPDF() {
-            if (images.length === 0) return;
+            if (items.length === 0) return;
 
             const convertBtn = document.getElementById('convert-btn');
             const originalHTML = convertBtn.innerHTML;
@@ -725,10 +726,16 @@
             convertBtn.disabled = true;
             convertBtn.innerHTML = `
                 <i class="fa-solid fa-spinner fa-spin mr-3"></i>
-                <span>Memproses... (0/${images.length})</span>
+                <span>Memproses... (0/${items.length})</span>
             `;
 
             try {
+                if (!window.jspdf || !window.jspdf.jsPDF) {
+                    showToast('Gagal memuat library PDF. Coba refresh halaman (Ctrl + Shift + R).');
+                    convertBtn.innerHTML = originalHTML;
+                    convertBtn.disabled = false;
+                    return;
+                }
                 const { jsPDF } = window.jspdf;
                 
                 // Get settings
